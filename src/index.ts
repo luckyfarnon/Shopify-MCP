@@ -23,6 +23,7 @@ import { getBlogById } from "./tools/getBlogById.js";
 import { getArticleById } from "./tools/getArticleById.js";
 import { searchShopify } from "./tools/searchShopify.js";
 import { createArticle } from "./tools/createArticle.js";
+import { deleteProduct } from "./tools/deleteProduct.js";
 
 // Parse command line arguments
 const argv = minimist(process.argv.slice(2));
@@ -81,6 +82,7 @@ getBlogById.initialize(shopifyClient);
 getArticleById.initialize(shopifyClient);
 searchShopify.initialize(shopifyClient);
 createArticle.initialize(shopifyClient);
+deleteProduct.initialize(shopifyClient);
 
 // Set up MCP server
 const server = new McpServer({
@@ -99,6 +101,17 @@ server.tool(
   },
   async (args) => {
     const result = await getProducts.execute(args);
+    return {
+      content: [{ type: "text", text: JSON.stringify(result) }]
+    };
+  }
+);
+
+server.tool(
+  "delete-product",
+  deleteProduct.schema.shape,
+  async (args: z.infer<typeof deleteProduct.schema>) => {
+    const result = await deleteProduct.execute(args);
     return {
       content: [{ type: "text", text: JSON.stringify(result) }]
     };
