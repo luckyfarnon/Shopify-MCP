@@ -2,9 +2,6 @@
 
 MCP Server for Shopify API, enabling interaction with store data through GraphQL API. This server provides tools for managing products, customers, orders, and more.
 
-**📦 Package Name: `shopify-mcp`**  
-**🚀 Command: `shopify-mcp` (NOT `shopify-mcp-server`)**
-
 ## Features
 
 - **Product Management**: Search, retrieve, and update product information, including SEO-optimized content
@@ -52,14 +49,15 @@ Add this to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "shopify": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "shopify-mcp",
-        "--accessToken",
-        "<YOUR_ACCESS_TOKEN>",
+        "/absolute/path/to/Shopify-MCP/dist/index.js",
         "--domain",
         "<YOUR_SHOP>.myshopify.com"
-      ]
+      ],
+      "env": {
+        "SHOPIFY_ACCESS_TOKEN": "<YOUR_ACCESS_TOKEN>"
+      }
     }
   }
 }
@@ -81,26 +79,12 @@ If you prefer to use environment variables instead of command-line arguments:
    MYSHOPIFY_DOMAIN=your-store.myshopify.com
    ```
 
-2. Run the server with npx:
+2. Build and run the server from this checkout:
    ```
-   npx shopify-mcp
+   npm ci && npm run build
+   node dist/index.js
    ```
 
-### Direct Installation (Optional)
-
-If you want to install the package globally:
-
-```
-npm install -g shopify-mcp
-```
-
-Then run it:
-
-```
-shopify-mcp --accessToken=<YOUR_ACCESS_TOKEN> --domain=<YOUR_SHOP>.myshopify.com
-```
-
-**⚠️ Important:** If you see errors about "SHOPIFY_ACCESS_TOKEN environment variable is required" when using command-line arguments, you might have a different package installed. Make sure you're using `shopify-mcp`, not `shopify-mcp-server`.
 
 ## Available Tools
 

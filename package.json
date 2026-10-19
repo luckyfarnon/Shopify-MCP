@@ -23,11 +23,7 @@
     "llm",
     "claude"
   ],
-  "author": {
-    "name": "Your Name",
-    "email": "your.email@example.com",
-    "url": "https://your-website.com"
-  },
+  "private": true,
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",

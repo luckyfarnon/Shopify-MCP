@@ -1,14 +1,13 @@
 {
-    
-        "shopify-mcp": {
-            "command": "npx",
-            "args": [
-                "shopify-mcp",
-                "--accessToken",
-                "<YOUR_SHOPIFY_ACCESS_TOKEN>",
-                "--domain",
-                "<YOUR_SHOP>.myshopify.com"
-            ]
-        }
+  "shopify": {
+    "command": "node",
+    "args": [
+      "/absolute/path/to/Shopify-MCP/dist/index.js",
+      "--domain",
+      "<YOUR_SHOP>.myshopify.com"
+    ],
+    "env": {
+      "SHOPIFY_ACCESS_TOKEN": "<YOUR_SHOPIFY_ACCESS_TOKEN>"
     }
-} 
+  }
+}
