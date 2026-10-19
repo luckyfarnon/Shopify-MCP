@@ -1,3 +1,4 @@
+import { titleQuery } from "../utils/sanitize.js";
 import type { GraphQLClient } from "graphql-request";
 import { gql } from "graphql-request";
 import { z } from "zod";
@@ -5,7 +6,7 @@ import { z } from "zod";
 // Input schema for getCollections
 const GetCollectionsInputSchema = z.object({
   searchTitle: z.string().optional().describe("Optional search term to filter collections by title"),
-  limit: z.number().default(10).describe("Maximum number of collections to return (default: 10)")
+  limit: z.number().int().min(1).max(250).default(10).describe("Maximum number of collections to return (default: 10)")
 });
 
 type GetCollectionsInput = z.infer<typeof GetCollectionsInputSchema>;
@@ -50,7 +51,7 @@ const getCollections = {
 
       const variables = {
         first: limit,
-        query: searchTitle ? `title:*${searchTitle}*` : undefined
+        query: titleQuery(searchTitle)
       };
 
       const data = await shopifyClient.request(query, variables) as {

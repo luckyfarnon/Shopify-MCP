@@ -35,9 +35,12 @@ const SHOPIFY_ACCESS_TOKEN =
   argv.accessToken || process.env.SHOPIFY_ACCESS_TOKEN;
 const MYSHOPIFY_DOMAIN = argv.domain || process.env.MYSHOPIFY_DOMAIN;
 
-// Store in process.env for backwards compatibility
-process.env.SHOPIFY_ACCESS_TOKEN = SHOPIFY_ACCESS_TOKEN;
-process.env.MYSHOPIFY_DOMAIN = MYSHOPIFY_DOMAIN;
+if (argv.accessToken) {
+  console.error(
+    "Warning: --accessToken is visible in process lists and shell history. " +
+      "Prefer the SHOPIFY_ACCESS_TOKEN environment variable or a .env file."
+  );
+}
 
 // Validate required environment variables
 if (!SHOPIFY_ACCESS_TOKEN) {
@@ -51,6 +54,14 @@ if (!MYSHOPIFY_DOMAIN) {
   console.error("Error: MYSHOPIFY_DOMAIN is required.");
   console.error("Please provide it via command line argument or .env file.");
   console.error("  Command line: --domain=your-store.myshopify.com");
+  process.exit(1);
+}
+
+// Only send the admin token to a real myshopify.com store
+if (!/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/i.test(String(MYSHOPIFY_DOMAIN))) {
+  console.error(
+    "Error: MYSHOPIFY_DOMAIN must look like your-store.myshopify.com (no protocol or path)."
+  );
   process.exit(1);
 }
 
@@ -95,7 +106,10 @@ server.tool(
   "get-products",
   {
     searchTitle: z.string().optional(),
-    limit: z.number().default(10)
+    limit: z.number().int().min(1).max(250).default(10),
+    after: z.string().optional(),
+    before: z.string().optional(),
+    reverse: z.boolean().default(false)
   },
   async (args) => {
     const result = await getProducts.execute(args);
@@ -122,7 +136,7 @@ server.tool(
   "get-collections",
   {
     searchTitle: z.string().optional(),
-    limit: z.number().default(10)
+    limit: z.number().int().min(1).max(250).default(10)
   },
   async (args) => {
     const result = await getCollections.execute(args);
@@ -158,7 +172,7 @@ server.tool(
   "get-pages",
   {
     searchTitle: z.string().optional(),
-    limit: z.number().default(10)
+    limit: z.number().int().min(1).max(250).default(10)
   },
   async (args) => {
     const result = await getPages.execute(args);
@@ -195,7 +209,7 @@ server.tool(
   "get-blogs",
   {
     searchTitle: z.string().optional(),
-    limit: z.number().default(10)
+    limit: z.number().int().min(1).max(250).default(10)
   },
   async (args) => {
     const result = await getBlogs.execute(args);
@@ -229,7 +243,7 @@ server.tool(
   {
     blogId: z.string().min(1).describe("The GID of the blog to get articles from (e.g., \"gid://shopify/Blog/1234567890\")"),
     searchTitle: z.string().optional(),
-    limit: z.number().default(10)
+    limit: z.number().int().min(1).max(250).default(10)
   },
   async (args) => {
     const result = await getArticles.execute(args);

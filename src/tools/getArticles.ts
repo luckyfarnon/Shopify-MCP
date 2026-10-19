@@ -6,7 +6,7 @@ import { z } from "zod";
 const GetArticlesInputSchema = z.object({
   blogId: z.string().min(1).describe("The GID of the blog to get articles from (e.g., \"gid://shopify/Blog/1234567890\")"),
   searchTitle: z.string().optional().describe("Optional search term to filter articles by title"),
-  limit: z.number().default(10).describe("Maximum number of articles to return (default: 10)")
+  limit: z.number().int().min(1).max(250).default(10).describe("Maximum number of articles to return (default: 10)")
 });
 
 type GetArticlesInput = z.infer<typeof GetArticlesInputSchema>;

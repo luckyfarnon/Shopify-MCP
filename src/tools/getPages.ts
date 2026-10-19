@@ -5,7 +5,7 @@ import { z } from "zod";
 // Input schema for getPages
 const GetPagesInputSchema = z.object({
   searchTitle: z.string().optional().describe("Optional search term to filter pages by title"),
-  limit: z.number().default(10).describe("Maximum number of pages to return (default: 10)")
+  limit: z.number().int().min(1).max(250).default(10).describe("Maximum number of pages to return (default: 10)")
 });
 
 type GetPagesInput = z.infer<typeof GetPagesInputSchema>;

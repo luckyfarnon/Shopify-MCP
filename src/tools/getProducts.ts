@@ -1,3 +1,4 @@
+import { titleQuery } from "../utils/sanitize.js";
 import type { GraphQLClient } from "graphql-request";
 import { gql } from "graphql-request";
 import { z } from "zod";
@@ -5,7 +6,7 @@ import { z } from "zod";
 // Input schema for getProducts
 const GetProductsInputSchema = z.object({
   searchTitle: z.string().optional().describe("Optional search term to filter products by title"),
-  limit: z.number().default(10).describe("Maximum number of products to return (default: 10)"),
+  limit: z.number().int().min(1).max(250).default(10).describe("Maximum number of products to return (default: 10)"),
   after: z.string().optional().describe("Cursor for pagination - get items after this cursor"),
   before: z.string().optional().describe("Cursor for pagination - get items before this cursor"),
   reverse: z.boolean().optional().default(false).describe("Reverse the order of the returned products")
@@ -110,7 +111,7 @@ const getProducts = {
         last: before ? limit : undefined,
         after,
         before,
-        query: searchTitle ? `title:*${searchTitle}*` : undefined,
+        query: titleQuery(searchTitle),
         reverse
       };
 
