@@ -52,14 +52,6 @@
     "README.md",
     "LICENSE"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/GeLi2001/shopify-mcp"
-  },
-  "bugs": {
-    "url": "https://github.com/GeLi2001/shopify-mcp/issues"
-  },
-  "homepage": "https://github.com/GeLi2001/shopify-mcp#readme",
   "engines": {
     "node": ">=18.0.0"
   }
