@@ -1,9 +1,10 @@
 import type { GraphQLClient } from "graphql-request";
 import { gql } from "graphql-request";
 import { z } from "zod";
+import { gid, safeHtml, tagList } from "../utils/sanitize.js";
 
 const GetArticleByIdInputSchema = z.object({
-  articleId: z.string().min(1).describe("The GID of the article to fetch (e.g., \"gid://shopify/Article/1234567890\")")
+  articleId: gid("Article").describe("The GID of the article to fetch (e.g., \"gid://shopify/Article/1234567890\")")
 });
 
 type GetArticleByIdInput = z.infer<typeof GetArticleByIdInputSchema>;

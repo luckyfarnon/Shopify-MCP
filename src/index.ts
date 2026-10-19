@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { GraphQLClient } from "graphql-request";
 import minimist from "minimist";
 import { z } from "zod";
+import { gid, safeHtml, tagList } from "./utils/sanitize.js";
 
 // Import tools
 import { getProductById } from "./tools/getProductById.js";
@@ -101,6 +102,16 @@ const server = new McpServer({
     "MCP Server for Shopify API, enabling interaction with store data through GraphQL API"
 });
 
+// Mark every tool read-only or write so MCP clients can require confirmation
+// for anything that changes the store (limits damage from prompt injection).
+const registerTool = server.tool.bind(server) as (...args: any[]) => unknown;
+(server as any).tool = (name: string, shape: unknown, cb: unknown) =>
+  registerTool(name, shape, {
+    readOnlyHint: name.startsWith("get-") || name.startsWith("search-"),
+    destructiveHint: false,
+    openWorldHint: false
+  }, cb);
+
 // Add tools individually, using their schemas directly
 server.tool(
   "get-products",
@@ -122,7 +133,7 @@ server.tool(
 server.tool(
   "get-product-by-id",
   {
-    productId: z.string().min(1)
+    productId: gid("Product")
   },
   async (args) => {
     const result = await getProductById.execute(args);
@@ -150,10 +161,10 @@ server.tool(
 server.tool(
   "update-collection",
   {
-    collectionId: z.string().min(1).describe("The GID of the collection to update (e.g., \"gid://shopify/Collection/1234567890\")"),
+    collectionId: gid("Collection").describe("The GID of the collection to update (e.g., \"gid://shopify/Collection/1234567890\")"),
     title: z.string().optional(),
     description: z.string().optional(),
-    descriptionHtml: z.string().optional(),
+    descriptionHtml: safeHtml.optional(),
     seo: z.object({
       title: z.string().optional(),
       description: z.string().optional()
@@ -186,10 +197,10 @@ server.tool(
 server.tool(
   "update-page",
   {
-    pageId: z.string().min(1).describe("The GID of the page to update (e.g., \"gid://shopify/Page/1234567890\")"),
+    pageId: gid("Page").describe("The GID of the page to update (e.g., \"gid://shopify/Page/1234567890\")"),
     title: z.string().optional(),
-    body: z.string().optional(),
-    bodyHtml: z.string().optional(),
+    body: safeHtml.optional(),
+    bodyHtml: safeHtml.optional(),
     seo: z.object({
       title: z.string().optional(),
       description: z.string().optional()
@@ -223,7 +234,7 @@ server.tool(
 server.tool(
   "update-blog",
   {
-    blogId: z.string().min(1).describe("The GID of the blog to update (e.g., \"gid://shopify/Blog/1234567890\")"),
+    blogId: gid("Blog").describe("The GID of the blog to update (e.g., \"gid://shopify/Blog/1234567890\")"),
     title: z.string().optional(),
     handle: z.string().optional(),
     templateSuffix: z.string().optional(),
@@ -241,7 +252,7 @@ server.tool(
 server.tool(
   "get-articles",
   {
-    blogId: z.string().min(1).describe("The GID of the blog to get articles from (e.g., \"gid://shopify/Blog/1234567890\")"),
+    blogId: gid("Blog").describe("The GID of the blog to get articles from (e.g., \"gid://shopify/Blog/1234567890\")"),
     searchTitle: z.string().optional(),
     limit: z.number().int().min(1).max(250).default(10)
   },
@@ -257,11 +268,11 @@ server.tool(
 server.tool(
   "update-article",
   {
-    articleId: z.string().min(1).describe("The GID of the article to update (e.g., \"gid://shopify/Article/1234567890\")"),
+    articleId: gid("Article").describe("The GID of the article to update (e.g., \"gid://shopify/Article/1234567890\")"),
     title: z.string().optional(),
-    body: z.string().optional(),
+    body: safeHtml.optional(),
     summary: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+    tags: tagList.optional(),
     author: z.object({
       name: z.string()
     }).optional()
@@ -323,9 +334,9 @@ server.tool(
 server.tool(
   "update-product",
   {
-    productId: z.string().min(1).describe("The GID of the product to update (e.g., \"gid://shopify/Product/1234567890\")"),
+    productId: gid("Product").describe("The GID of the product to update (e.g., \"gid://shopify/Product/1234567890\")"),
     title: z.string().optional().describe("The new title for the product"),
-    descriptionHtml: z.string().optional().describe("The new HTML description for the product"),
+    descriptionHtml: safeHtml.optional().describe("The new HTML description for the product"),
     seo: z.object({
       title: z.string().optional().describe("SEO-optimized title for the product"),
       description: z.string().optional().describe("SEO meta description for the product")
@@ -333,7 +344,7 @@ server.tool(
     status: z.enum(["ACTIVE", "ARCHIVED", "DRAFT"]).optional().describe("Product status (ACTIVE, ARCHIVED, or DRAFT)"),
     vendor: z.string().optional().describe("The vendor or manufacturer of the product"),
     productType: z.string().optional().describe("The type or category of the product"),
-    tags: z.array(z.string()).optional().describe("Array of tags to categorize the product"),
+    tags: tagList.optional().describe("Array of tags to categorize the product"),
     variants: z.array(z.object({
       id: z.string().optional().describe("The GID of the variant to update"),
       price: z.string().optional().describe("The price of the variant"),

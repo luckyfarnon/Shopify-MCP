@@ -1,9 +1,10 @@
 import type { GraphQLClient } from "graphql-request";
 import { gql } from "graphql-request";
 import { z } from "zod";
+import { escapeSearchTerm } from "../utils/sanitize.js";
 
 const SearchShopifyInputSchema = z.object({
-  query: z.string().min(1).describe("The search query to find content across the store"),
+  query: z.string().min(1).max(200).describe("The search query to find content across the store"),
   types: z.array(z.enum(["ARTICLE", "BLOG", "PAGE", "PRODUCT"])).optional().describe("Types of resources to search for. If not specified, searches all types."),
   first: z.number().min(1).max(50).optional().default(10).describe("Number of results to return (max 50)")
 });
@@ -103,7 +104,7 @@ const searchShopify = {
         types.map(async (type) => {
           try {
             const data = await shopifyClient.request(queries[type], {
-              query: input.query,
+              query: escapeSearchTerm(input.query),
               first: input.first
             }) as SearchResponse;
             
