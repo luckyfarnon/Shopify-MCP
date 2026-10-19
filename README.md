@@ -68,6 +68,10 @@ Locations for the Claude Desktop config file:
 - MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
+### Read-only mode
+
+Set `SHOPIFY_READ_ONLY=true` (or pass `--readOnly`) to expose only the `get-*` and `search-*` tools. Use this together with a Shopify token that only has read scopes whenever you don't need the AI to edit the store.
+
 ### Alternative: Run Locally with Environment Variables
 
 If you prefer to use environment variables instead of command-line arguments:

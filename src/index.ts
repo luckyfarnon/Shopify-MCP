@@ -104,13 +104,19 @@ const server = new McpServer({
 
 // Mark every tool read-only or write so MCP clients can require confirmation
 // for anything that changes the store (limits damage from prompt injection).
+// Set SHOPIFY_READ_ONLY=true (or --readOnly) to expose only the read tools.
+const READ_ONLY =
+  argv.readOnly === true || process.env.SHOPIFY_READ_ONLY === "true";
 const registerTool = server.tool.bind(server) as (...args: any[]) => unknown;
-(server as any).tool = (name: string, shape: unknown, cb: unknown) =>
-  registerTool(name, shape, {
-    readOnlyHint: name.startsWith("get-") || name.startsWith("search-"),
+(server as any).tool = (name: string, shape: unknown, cb: unknown) => {
+  const isRead = name.startsWith("get-") || name.startsWith("search-");
+  if (READ_ONLY && !isRead) return undefined;
+  return registerTool(name, shape, {
+    readOnlyHint: isRead,
     destructiveHint: false,
     openWorldHint: false
   }, cb);
+};
 
 // Add tools individually, using their schemas directly
 server.tool(
